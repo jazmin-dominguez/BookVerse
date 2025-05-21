@@ -25,17 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'Books':
                     loadBooks();
                     break;
-                case 'Sale List':
-                    loadSaleList();
-                    break;
-                case 'Reports':
-                    loadReports();
-                    break;
                 case 'Settings':
                     loadSettings();
-                    break;
-                case 'New Login':
-                    loadNewLogin();
                     break;
                 case 'Logout':
                     logout();
@@ -95,7 +86,8 @@ function loadBooks() {
 }
 
 function logout() {
-    window.location.href = "login.html";
+    // Aquí podrías limpiar la sesión si usas una
+    window.location.href = "../home/index.html";
 }
 
 const sideMenu = document.querySelector('aside');
@@ -154,6 +146,8 @@ document.getElementById('profile-photo-clickable').addEventListener('click', () 
         })
         .catch(err => console.error(err));
 });
+
+
 
 
 function agregarUsuario() {
