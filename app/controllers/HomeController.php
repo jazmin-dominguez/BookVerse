@@ -15,7 +15,7 @@
                         'code'   => 200,
                         'title'  => 'BookVerse 2025'
                         ];
-            View::render('home',$response);
+            View::render('home/home',$response);
         }
 
     }
