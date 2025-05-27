@@ -4,7 +4,8 @@
 
     use app\controllers\Controller as Controller;
     use app\classes\Views as View;
-    use app\models\user as user;
+    require_once __DIR__ . '/../../models/user.php';
+    use app\models\users as user;
     use app\controllers\auth\SessionController as SC;
 
     class RegisterController extends Controller {

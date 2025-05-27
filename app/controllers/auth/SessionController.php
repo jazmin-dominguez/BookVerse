@@ -5,7 +5,8 @@
     use app\controllers\Controller as Controller;
     use app\classes\Views as View;
     use app\classes\Redirect as Redirect;
-    use app\models\user as user;
+    require_once __DIR__ . '/../../models/user.php';
+    use app\models\User as user;
 
     class SessionController extends Controller {
         public function __construct(){

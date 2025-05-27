@@ -18,7 +18,7 @@
             $this->initConfig();
             $this->loadFunctions();
             $this->initAutoloader();
-            $this->initRouter();
+            return $this->initRouter();
         }
 
         private function initConfig(){
@@ -47,17 +47,29 @@
         }
 
         private function initRouter(){
-            // if(!file_exists(CLASSES . "Router.php")){
-            //     die("No se encontró la clase Router.php");
-            // }
-            // require_once CLASSES . 'Router.php';
             $router = new Router();
-            $router->route();
+            return $router->route();
         }
 
       
         public static function run(){
-            $app = new self();
-            return;
+            try {
+                $app = new self();
+                return $app->initRouter();
+            } catch (\Exception $e) {
+                error_log('Error en App::run - ' . $e->getMessage());
+                if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+                    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                    ob_clean();
+                    header('Content-Type: application/json; charset=utf-8');
+                    http_response_code(500);
+                    echo json_encode([
+                        'success' => false,
+                        'error' => 'Error interno del servidor'
+                    ], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+                throw $e;
+            }
         }
     }

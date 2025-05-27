@@ -140,24 +140,6 @@
             
                 <!-- End of Analyses -->
 
-                <!-- Recent Orders Table -->
-                <div class="recent-orders">
-                    <h2>Recent Orders</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Book Name</th>
-                                <th>Book Number</th>
-                                <th>Likes</th>
-                                <th>Dislikes</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                    <a href="#">Show All</a>
-                </div>
-                <!-- End of Recent Orders -->
             </div>
         
 
@@ -166,7 +148,6 @@
 
     </div>
 
-    <script src="JS/orders.js"></script>
     <script src="JS/index.js"></script>
     <script src="books.js"></script>
     

@@ -5,10 +5,6 @@
     use app\controllers\auth\SessionController as SC;
     class HomeController extends Controller {
 
-        public function __construct(){
-            parent::__construct();
-        }
-
         public function index($params = null){
             $response = [
                         'ua' => SC::sessionValidate() ?? [ 'sv' => 0 ],

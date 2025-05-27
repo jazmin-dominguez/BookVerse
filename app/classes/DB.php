@@ -100,10 +100,7 @@
             return $this;
         }
 
-        /**
-         * Establece las condiciones WHERE
-         * @param array $conditions Array de condiciones [campo, operador, valor]
-         */
+        //Establece las condiciones WHERE 
         public function where($conditions = []) {
             $this->where = "";
             $this->params = [];
@@ -137,9 +134,7 @@
             return $this;
         }
 
-        /**
-         * Establece el orden de los resultados
-         */
+        //Establece el orden de los resultados 
         public function orderBy($orders = []) {
             $this->orderBy = "";
             if (count($orders) > 0) {
@@ -154,33 +149,58 @@
             return $this;
         }
 
-        /**
-         * Establece el límite de resultados
-         */
+        //Establece el límite de resultados 
         public function limit($limit = "") {
             $this->limit = $limit ? ' LIMIT ' . (int)$limit : '';
             return $this;
         }
 
-        /**
-         * Ejecuta la consulta y retorna los resultados
-         */
+        //Ejecuta la consulta y retorna los resultados 
         public function get() {
-            try {
-                $sql = "SELECT " . $this->select . $this->count .
-                       " FROM " . $this->tableName .
-                       $this->joins .
-                       " WHERE " . $this->where .
-                       $this->orderBy .
-                       $this->limit;
-
-                $stmt = $this->table->prepare($sql);
-                
+            try { 
+                $sql = "SELECT " . ($this->select ?: '*');
+                if ($this->count) {
+                    $sql .= ", " . $this->count;
+                }
+                $sql .= " FROM " . $this->tableName;
+                 
+                if ($this->joins) {
+                    $sql .= $this->joins;
+                }
+                 
+                if ($this->where) {
+                    $sql .= " WHERE " . $this->where;
+                }
+                 
+                if ($this->orderBy) {
+                    $sql .= $this->orderBy;
+                }
+                 
+                if ($this->limit) {
+                    $sql .= $this->limit;
+                }
+ 
+                error_log("SQL Query: " . $sql);
                 if ($this->params) {
-                    $stmt->bind_param($this->paramTypes, ...$this->params);
+                    error_log("Params: " . print_r($this->params, true));
+                    error_log("Types: " . $this->paramTypes);
+                }
+
+                // Preparar y ejecutar la consulta
+                if (!($stmt = $this->table->prepare($sql))) {
+                    throw new \Exception("Error preparando la consulta: " . $this->table->error);
                 }
                 
-                $stmt->execute();
+                if ($this->params && $this->paramTypes) {
+                    if (!$stmt->bind_param($this->paramTypes, ...$this->params)) {
+                        throw new \Exception("Error vinculando parámetros: " . $stmt->error);
+                    }
+                }
+                
+                if (!$stmt->execute()) {
+                    throw new \Exception("Error ejecutando la consulta: " . $stmt->error);
+                }
+                
                 $result = $stmt->get_result();
                 $data = [];
                 
@@ -196,9 +216,7 @@
             }
         }
 
-        /**
-         * Inserta un nuevo registro
-         */
+        //Inserta un nuevo registro 
         public function create() {
             try {
                 if (empty($this->fillable) || empty($this->values)) {
@@ -221,9 +239,7 @@
             }
         }
 
-        /**
-         * Actualiza registros
-         */
+        //Actualiza registros 
         public function update($data) {
             try {
                 if (empty($data) || empty($this->where)) {
@@ -259,9 +275,7 @@
             }
         }
 
-        /**
-         * Elimina registros
-         */
+        //Elimina registros 
         public function delete() {
             try {
                 if (empty($this->where)) {
@@ -283,9 +297,7 @@
             }
         }
 
-        /**
-         * Determina el tipo de parámetro para bind_param
-         */
+        //Determina el tipo de parámetro para bind_param 
         private function getParamType($value) {
             if (is_int($value)) return 'i';
             if (is_double($value)) return 'd';
@@ -293,9 +305,28 @@
             return 'b';
         }
 
-        /**
-         * Cierra la conexión
-         */
+        //Ejecuta una consulta SQL directa
+        public function query($sql) {
+            try {
+                $result = $this->table->query($sql);
+                if (!$result) {
+                    throw new \Exception("Error ejecutando la consulta: " . $this->table->error);
+                }
+                
+                $data = [];
+                while ($row = $result->fetch_assoc()) {
+                    $data[] = $row;
+                }
+                
+                $result->free();
+                return $data;
+            } catch (\Exception $e) {
+                error_log("Error en la consulta SQL: " . $e->getMessage() . "\nSQL: " . $sql);
+                die("Error en la consulta: " . $e->getMessage());
+            }
+        }
+
+        //Cierra la conexión 
         public function __destruct() {
             if ($this->table) {
                 $this->table->close();

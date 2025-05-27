@@ -15,6 +15,8 @@ define('DB_NAME', IS_LOCAL ? 'bookverse' : 'REMOTE DATA BASE NAME');
 define('CLASSES'        , ROOT . 'classes' . DS);
 define('CLASSES_PATH'   , ROOT . '..' . DS);
 define('CONTROLLERS'    , ROOT . 'controllers' . DS);
+define('MODELS'        , ROOT . 'models' . DS);
+
 define('RESOURCES'      , ROOT . 'resources' . DS);
 define('ASSETS'         , DS . 'assets' . DS);
 define('CSS'            , ASSETS . 'css' . DS);

@@ -9,11 +9,15 @@ class Autoloader {
     private static function autoload($name){
         $className      = CLASSES_PATH . str_replace('\\', DS, $name) . '.php';
         $controllerName = CONTROLLERS . str_replace('\\', DS, $name) . '.php';
-        if( file_exists( $className )){
+        $modelName     = MODELS . str_replace('\\', DS, $name) . '.php';
+        
+        if(file_exists($className)){
             require_once $className;
-        }elseif( file_exists( $controllerName )){
+        } elseif(file_exists($controllerName)){
             require_once $controllerName;
-        }else{
+        } elseif(file_exists($modelName)){
+            require_once $modelName;
+        } else {
             return false;
         }
     }
