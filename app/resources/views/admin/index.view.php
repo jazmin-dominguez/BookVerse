@@ -1,8 +1,8 @@
 <?php
-require_once __DIR__ . '/../../../config.php';
-require_once __DIR__ . '/../../functions/session_functions.php';
+    require_once __DIR__ . '/../../../config.php';
+    require_once __DIR__ . '/../../functions/session_functions.php';
 
-requireAdmin();
+    requireAdmin();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -100,7 +100,7 @@ requireAdmin();
                 require_once __DIR__ . '/../../../models/user.php';
                 require_once __DIR__ . '/../../../models/likes.php';
 
-                $booksModel = new \app\models\books();
+                $booksModel = new \app\models\Books();
                 $usersModel = new \app\models\User();
                 $likesModel = new \app\models\likes();
 

@@ -16,7 +16,18 @@ class UserController extends Controller {
             session_start();
         }
 
-        if (!isset($_SESSION['user_id'])) {
+        $this->userModel = new \app\models\User();
+    }
+
+    public function index() {
+        // Vista principal de usuarios (acceso público si es necesario)
+        $users = $this->userModel->getAllUsers();
+        $this->view('admin/users', ['users' => $users]);
+    }
+
+    public function users() {
+        // Vista de administración de usuarios (requiere autenticación)
+        if (!$this->isAuthenticated()) {
             if ($this->isAjax) {
                 ob_clean();
                 header('Content-Type: application/json; charset=utf-8');
@@ -32,10 +43,22 @@ class UserController extends Controller {
             }
         }
 
-        $this->userModel = new \app\models\User();
-    }
+        if (!$this->isAdmin()) {
+            if ($this->isAjax) {
+                ob_clean();
+                header('Content-Type: application/json; charset=utf-8');
+                http_response_code(403);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Acceso denegado. Se requieren permisos de administrador.'
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
+            } else {
+                header('Location: /BookVerse/');
+                exit;
+            }
+        }
 
-    public function index() {
         $users = $this->userModel->getAllUsers();
         $this->view('admin/users', ['users' => $users]);
     }
@@ -55,7 +78,7 @@ class UserController extends Controller {
             }
 
             // Verificar si la sesión está activa
-            if (!isset($_SESSION['user_id'])) {
+            if (!$this->isAuthenticated()) {
                 http_response_code(401);
                 echo json_encode([
                     'success' => false, 
@@ -65,7 +88,7 @@ class UserController extends Controller {
             }
 
             // Verificar si es administrador
-            if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+            if (!$this->isAdmin()) {
                 http_response_code(403);
                 echo json_encode([
                     'success' => false, 
@@ -79,6 +102,14 @@ class UserController extends Controller {
             
             if ($users === false) {
                 throw new \Exception('Error al obtener usuarios de la base de datos');
+            }
+
+            // Si getAllUsers devuelve JSON, decodificarlo
+            if (is_string($users)) {
+                $users = json_decode($users, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw new \Exception('Error al decodificar datos de usuarios');
+                }
             }
 
             error_log('Número de usuarios obtenidos: ' . count($users));
@@ -99,24 +130,98 @@ class UserController extends Controller {
         exit;
     }
 
+    public function getUser($params = null) {
+        if (isset($params[0])) {
+            $userId = $params[0];
+            $user = $this->userModel->getUserById($userId);
+            
+            if ($user && !empty($user)) {
+                $this->view('user/profile', ['user' => $user[0]]);
+            } else {
+                header('Location: /BookVerse/');
+                exit;
+            }
+        } else {
+            header('Location: /BookVerse/');
+            exit;
+        }
+    }
+
     public function profile() {
+        if (!$this->isAuthenticated()) {
+            header('Location: /BookVerse/auth/login');
+            exit;
+        }
         $this->view('user/profile');
     }
 
     public function books() {
+        if (!$this->isAuthenticated()) {
+            header('Location: /BookVerse/auth/login');
+            exit;
+        }
         $this->view('user/books');
     }
 
     public function reviews() {
+        if (!$this->isAuthenticated()) {
+            header('Location: /BookVerse/auth/login');
+            exit;
+        }
         $this->view('user/reviews');
     }
 
     public function favorites() {
+        if (!$this->isAuthenticated()) {
+            header('Location: /BookVerse/auth/login');
+            exit;
+        }
         $this->view('user/favorites');
     }
 
     public function readingList() {
+        if (!$this->isAuthenticated()) {
+            header('Location: /BookVerse/auth/login');
+            exit;
+        }
         $this->view('user/reading_list');
+    }
+
+    public function search($params = null) {
+        ob_clean();
+        header('Content-Type: application/json; charset=utf-8');
+        
+        try {
+            if (!isset($params[0]) || empty($params[0])) {
+                throw new \Exception('Parámetro de búsqueda requerido');
+            }
+
+            $query = $params[0];
+            $results = $this->userModel->searchUsers($query);
+            
+            // Si searchUsers devuelve JSON, decodificarlo para validar
+            if (is_string($results)) {
+                $decoded = json_decode($results, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw new \Exception('Error en los resultados de búsqueda');
+                }
+                echo $results; // Devolver el JSON original
+            } else {
+                echo json_encode([
+                    'success' => true,
+                    'users' => $results
+                ], JSON_UNESCAPED_UNICODE);
+            }
+
+        } catch (\Exception $e) {
+            error_log('Error en UserController::search - ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], JSON_UNESCAPED_UNICODE);
+        }
+        exit;
     }
 
     private function processImage($imageData) {
@@ -173,6 +278,17 @@ class UserController extends Controller {
         header('Content-Type: application/json; charset=utf-8');
         
         try {
+            // Verificar autenticación y permisos
+            if (!$this->isAuthenticated()) {
+                http_response_code(401);
+                throw new \Exception('No autorizado');
+            }
+
+            if (!$this->isAdmin()) {
+                http_response_code(403);
+                throw new \Exception('Se requieren permisos de administrador');
+            }
+
             $input = file_get_contents('php://input');
             error_log('Datos recibidos: ' . $input);
             
@@ -223,7 +339,9 @@ class UserController extends Controller {
             
         } catch (\Exception $e) {
             error_log('Error en UserController::create - ' . $e->getMessage());
-            http_response_code(500);
+            if (http_response_code() === 200) {
+                http_response_code(500);
+            }
             echo json_encode([
                 'success' => false,
                 'error' => $e->getMessage()
@@ -245,13 +363,13 @@ class UserController extends Controller {
             }
     
             // Verificar autenticación
-            if (!isset($_SESSION['user_id'])) {
+            if (!$this->isAuthenticated()) {
                 http_response_code(401);
                 throw new \Exception('No autorizado');
             }
     
             // Verificar permisos de administrador
-            if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+            if (!$this->isAdmin()) {
                 http_response_code(403);
                 throw new \Exception('Acceso denegado');
             }
@@ -320,7 +438,7 @@ class UserController extends Controller {
             }
 
             // Verificar si es administrador
-            if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+            if (!$this->isAdmin()) {
                 http_response_code(403);
                 throw new \Exception('No tiene permisos para realizar esta acción');
             }
@@ -358,5 +476,35 @@ class UserController extends Controller {
         }
         
         exit;
+    }
+
+    // Métodos auxiliares
+    private function isAuthenticated() {
+        return isset($_SESSION['user_id']);
+    }
+
+    private function isAdmin() {
+        return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
+    }
+
+    // Métodos adicionales para compatibilidad
+    public function store() {
+        // Redirigir al método create para mantener compatibilidad
+        $this->create();
+    }
+
+    public function edit($params = null) {
+        if (!$this->isAdmin() || !isset($params[0])) {
+            header('Location: /BookVerse/auth/login');
+            exit;
+        }
+
+        $user = $this->userModel->getUserById($params[0]);
+        if (!$user) {
+            header('Location: /BookVerse/admin/users');
+            exit;
+        }
+
+        $this->view('admin/users/form', ['user' => $user[0]]);
     }
 }

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 23, 2025 at 09:06 AM
+-- Generation Time: May 29, 2025 at 01:13 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -36,8 +36,10 @@ CREATE TABLE `books` (
   `publication_year` year(4) DEFAULT NULL,
   `publisher` varchar(100) DEFAULT NULL,
   `pages` int(11) DEFAULT NULL,
-  `synopsis` text DEFAULT NULL,
+  `description` text DEFAULT NULL,
   `cover_image` varchar(255) DEFAULT NULL,
+  `stock` int(11) NOT NULL DEFAULT 0,
+  `status` enum('active','inactive') NOT NULL DEFAULT 'active',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -46,12 +48,12 @@ CREATE TABLE `books` (
 -- Dumping data for table `books`
 --
 
-INSERT INTO `books` (`id`, `title`, `author`, `isbn`, `genre`, `publication_year`, `publisher`, `pages`, `synopsis`, `cover_image`, `created_at`, `updated_at`) VALUES
-(1, 'Cien años de soledad', 'Gabriel García Márquez', '9780307474728', 'Realismo mágico', '1967', 'Editorial Sudamericana', 417, 'La novela narra la historia de la familia Buendía a lo largo de siete generaciones en el pueblo ficticio de Macondo.', 'cien_anos_soledad.jpg', '2025-05-23 07:05:48', '2025-05-23 07:05:48'),
-(2, 'Don Quijote de la Mancha', 'Miguel de Cervantes', '9788424902402', 'Novela', '0000', 'Editorial Espasa', 863, 'Las aventuras de un hidalgo manchego que pierde la razón por leer demasiados libros de caballerías.', 'don_quijote.jpg', '2025-05-23 07:05:48', '2025-05-23 07:05:48'),
-(3, '1984', 'George Orwell', '9780451524935', 'Distopía', '1949', 'Secker & Warburg', 328, 'Una novela distópica sobre un régimen totalitario que controla todos los aspectos de la vida.', '1984.jpg', '2025-05-23 07:05:48', '2025-05-23 07:05:48'),
-(4, 'El Principito', 'Antoine de Saint-Exupéry', '9782070408504', 'Literatura infantil', '1943', 'Reynal & Hitchcock', 96, 'La historia de un pequeño príncipe que viaja por el universo visitando diferentes planetas.', 'principito.jpg', '2025-05-23 07:05:48', '2025-05-23 07:05:48'),
-(5, 'Orgullo y prejuicio', 'Jane Austen', '9780141439518', 'Romance', '0000', 'T. Egerton', 432, 'La historia de Elizabeth Bennet y su compleja relación con el aparentemente arrogante Sr. Darcy.', 'orgullo_prejuicio.jpg', '2025-05-23 07:05:48', '2025-05-23 07:05:48');
+INSERT INTO `books` (`id`, `title`, `author`, `isbn`, `genre`, `publication_year`, `publisher`, `pages`, `description`, `cover_image`, `stock`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Cien años de soledad', 'Gabriel García Márquez', '9780307474728', 'Realismo mágico', '1967', 'Editorial Sudamericana', 417, 'La novela narra la historia de la familia Buendía a lo largo de siete generaciones en el pueblo ficticio de Macondo.', 'cien_anos_soledad.jpg', 0, 'active', '2025-05-23 07:05:48', '2025-05-23 07:05:48'),
+(2, 'Don Quijote de la Mancha', 'Miguel de Cervantes', '9788424902402', 'Novela', '0000', 'Editorial Espasa', 863, 'Las aventuras de un hidalgo manchego que pierde la razón por leer demasiados libros de caballerías.', 'don_quijote.jpg', 0, 'active', '2025-05-23 07:05:48', '2025-05-23 07:05:48'),
+(3, '1984', 'George Orwell', '9780451524935', 'Distopía', '1949', 'Secker & Warburg', 328, 'Una novela distópica sobre un régimen totalitario que controla todos los aspectos de la vida.', '1984.jpg', 0, 'active', '2025-05-23 07:05:48', '2025-05-23 07:05:48'),
+(4, 'El Principito', 'Antoine de Saint-Exupéry', '9782070408504', 'Literatura infantil', '1943', 'Reynal & Hitchcock', 96, 'La historia de un pequeño príncipe que viaja por el universo visitando diferentes planetas.', 'principito.jpg', 0, 'active', '2025-05-23 07:05:48', '2025-05-23 07:05:48'),
+(5, 'Orgullo y prejuicio', 'Jane Austen', '9780141439518', 'Romance', '0000', 'T. Egerton', 432, 'La historia de Elizabeth Bennet y su compleja relación con el aparentemente arrogante Sr. Darcy.', 'orgullo_prejuicio.jpg', 0, 'active', '2025-05-23 07:05:48', '2025-05-23 07:05:48');
 
 -- --------------------------------------------------------
 
@@ -91,6 +93,7 @@ INSERT INTO `interactions` (`id`, `user_id`, `book_id`, `interaction_type`, `cre
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
+  `imagen` text NOT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `full_name` varchar(100) NOT NULL,
@@ -104,11 +107,13 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `email`, `password`, `full_name`, `role`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'admin', 'admin@bookverse.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Administrador del Sistema', 'admin', 'active', '2025-05-23 07:05:48', '2025-05-23 07:05:48'),
-(2, 'juan_lector', 'juan@email.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Juan Pérez', 'user', 'active', '2025-05-23 07:05:48', '2025-05-23 07:05:48'),
-(3, 'maria_books', 'maria@email.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'María González', 'user', 'active', '2025-05-23 07:05:48', '2025-05-23 07:05:48'),
-(4, 'carlos_reader', 'carlos@email.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Carlos Rodríguez', 'user', 'active', '2025-05-23 07:05:48', '2025-05-23 07:05:48');
+INSERT INTO `users` (`id`, `username`, `imagen`, `email`, `password`, `full_name`, `role`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'adminnnnnnnnnnnn', 'http://localhost/BookVerse/admin/users', 'admin@bookverse.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Administrador del Sistema', 'admin', 'inactive', '2025-05-23 07:05:48', '2025-05-27 17:01:09'),
+(2, 'juan_lector', 'http://localhost/BookVerse/admin/users', 'juan@email.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Juan', 'user', 'inactive', '2025-05-23 07:05:48', '2025-05-27 12:20:29'),
+(3, 'maria_books', '', 'maria@email.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'María González', 'user', 'inactive', '2025-05-23 07:05:48', '2025-05-27 17:02:14'),
+(4, 'carlos_reader', 'http://localhost/BookVerse/admin/users', 'carlos@email.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Carlos ', 'user', 'active', '2025-05-23 07:05:48', '2025-05-27 17:13:32'),
+(5, 'Anne', '/BookVerse/app/public/images/default-avatar.png', 'najara@gmail.com', '$2y$10$KPJZOya.NyKVs/Ee9wllB.lxV0OVkk71i4hKhdOWVnYh9NKXG8rke', 'Annelise Cabrales', 'admin', 'inactive', '2025-05-26 03:24:45', '2025-05-27 17:01:30'),
+(8, 'nuevo', '', 'najara10528@gmail.com', '$2y$10$/lFrpQKB/exmFkC0dK3RdOUyxWLOYtkzWHBWCwjHJngm.qy9NBByu', 'nuevo nieco', 'user', 'inactive', '2025-05-27 04:14:51', '2025-05-27 04:15:00');
 
 --
 -- Indexes for dumped tables
@@ -164,7 +169,7 @@ ALTER TABLE `interactions`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Constraints for dumped tables

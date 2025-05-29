@@ -1,5 +1,9 @@
 <?php
-    require_once __DIR__ . '/../../../models/user.php';
+    require_once __DIR__ . '/../../../config.php';
+    require_once __DIR__ . '/../../functions/session_functions.php';
+    require_once __DIR__ . '/../../../models/User.php';
+
+
     $usersModel = new \app\models\User();
     $users = $usersModel->getAllUsers(100);
 ?>
@@ -271,51 +275,53 @@ table {
     </div>
 
     <!-- Modal Form -->
-    <div id="user-form-modal">
-        <span class="close" onclick="cerrarFormulario()">&times;</span>
-        <h3>Agregar Usuario</h3>
-        <form id="userForm" onsubmit="guardarUsuario(event)">
-            <div class="form-group">
-                <label for="imagen-input">Imagen de Perfil:</label>
-                <div class="image-preview empty" id="image-preview" onclick="document.getElementById('imagen-input').click()">
-                    <span>Seleccionar imagen</span>
-                </div>
-                <input type="file" id="imagen-input" accept="image/*" style="display: none;" onchange="previewImage(this)">
-                <input type="hidden" id="imagen-base64" name="imagen">
+    <!-- Modal Form Corregido -->
+<div id="user-form-modal">
+    <span class="close" onclick="cerrarFormulario()">&times;</span>
+    <h3 id="form-title">Agregar Usuario</h3>
+    <form id="userForm" onsubmit="guardarUsuario(event)">
+        <div class="form-group">
+            <label for="imagen-input">Imagen de Perfil:</label>
+            <div class="image-preview empty" id="image-preview" onclick="document.getElementById('imagen-input').click()">
+                <span>Seleccionar imagen</span>
             </div>
-            <div class="form-group">
-                <label for="username">Usuario:</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="full_name">Nombre Completo:</label>
-                <input type="text" id="full_name" name="full_name" required>
-            </div>
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Contraseña:</label>
-                <input type="password" id="password" name="password">
-            </div>
-            <div class="form-group">
-                <label for="confirm_password">Confirmar Contraseña:</label>
-                <input type="password" id="confirm_password" name="confirm_password">
-                <small style="color: #666; font-size: 12px;">Debe coincidir con la contraseña ingresada</small>
-            </div>
-            <div class="form-group">
-                <label for="role">Rol:</label>
-                <select id="role" name="role" required>
-                    <option value="">Seleccione</option>
-                    <option value="user">Usuario</option>
-                    <option value="admin">Administrador</option>
-                </select>
-            </div>
-            <button type="submit">Guardar</button>
-            <button type="button" onclick="cerrarFormulario()">Cancelar</button>
-        </form>
-    </div>
+            <input type="file" id="imagen-input" accept="image/*" style="display: none;" onchange="previewImage(this)">
+            <input type="hidden" id="imagen-base64" name="imagen">
+        </div>
+        <div class="form-group">
+            <label for="username">Usuario:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="full_name">Nombre Completo:</label>
+            <input type="text" id="full_name" name="full_name" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password">
+            <small id="password-help" style="color: #666; font-size: 12px;">Requerido para crear usuario</small>
+        </div>
+        <div class="form-group">
+            <label for="confirm_password">Confirmar Contraseña:</label>
+            <input type="password" id="confirm_password" name="confirm_password">
+            <small style="color: #666; font-size: 12px;">Debe coincidir con la contraseña ingresada</small>
+        </div>
+        <div class="form-group">
+            <label for="role">Rol:</label>
+            <select id="role" name="role" required>
+                <option value="">Seleccione</option>
+                <option value="user">Usuario</option>
+                <option value="admin">Administrador</option>
+            </select>
+        </div>
+        <button type="submit" id="submit-btn">Guardar</button>
+        <button type="button" onclick="cerrarFormulario()">Cancelar</button>
+    </form>
+</div>
 
     <script src="/BookVerse/app/resources/views/admin/JS/index.js"></script>
     <script src="/BookVerse/app/resources/views/admin/JS/usuarios.js"></script>

@@ -1,27 +1,13 @@
 RewriteEngine On
 RewriteBase /BookVerse/
 
-# Forzar HTTPS
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# Permitir acceso directo a archivos que existen físicamente
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
 
-# Agregar encabezados CORS y JSON para rutas de la API
-<IfModule mod_headers.c>
-    Header set Access-Control-Allow-Origin "*"
-    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-    Header set Access-Control-Allow-Headers "X-Requested-With, Content-Type, Accept, Origin, Authorization"
-    
-    # Establecer tipo de contenido JSON para rutas de la API
-    <FilesMatch "^admin/users/.*$">
-        Header set Content-Type "application/json"
-    </FilesMatch>
-</IfModule>
+# Permitir acceso directo a directorios que existen físicamente
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-# Manejar OPTIONS para CORS preflight
-RewriteCond %{REQUEST_METHOD} OPTIONS
-RewriteRule ^(.*)$ $1 [R=200,L]
-
-# Si el archivo o directorio no existe, redirige a index.php
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
+# TODAS las rutas van al Router (incluyendo admin y auth)
 RewriteRule ^(.*)$ index.php?uri=$1 [QSA,L]

@@ -3,7 +3,7 @@ session_start();
 require_once __DIR__ . '/../../functions/books_functions.php';
 
 // Obtener libros recomendados (por ejemplo, los últimos 6 libros)
-$recommendedBooks = getAllBooks(6);
+$recommendedBooks = getAllBooks(10);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -17,8 +17,6 @@ $recommendedBooks = getAllBooks(6);
         <div class="brand"><strong>BookVerse</strong></div>
         <div class="nav-links">
             <a href="/BookVerse/">Inicio</a>
-            <a href="/BookVerse/categories">Categorías</a>
-            <a href="/BookVerse/popular">Más populares</a>
             <?php if (isset($_SESSION['user_id'])): ?>
                 <a href="/BookVerse/profile">
                     <i class="bi bi-person-circle"></i> Mi Perfil
@@ -28,14 +26,14 @@ $recommendedBooks = getAllBooks(6);
                         <i class="bi bi-gear"></i> Administrar
                     </a>
                 <?php endif; ?>
-                <a href="/BookVerse/logout">
+                <a href="/BookVerse/auth/logout">
                     <button class="btn btn-outline">Cerrar Sesión</button>
                 </a>
             <?php else: ?>
                 <a href="/BookVerse/auth/login">
                     <button class="btn btn-outline">Iniciar Sesión</button>
                 </a>
-                <a href="/BookVerse/auth/register">
+                <a href="/BookVerse/auth/login">
                     <button class="btn">Registrarse</button>
                 </a>
             <?php endif; ?>
